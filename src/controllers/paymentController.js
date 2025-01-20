@@ -1,37 +1,38 @@
-const Razorpay = require('razorpay');
-const crypto = require('crypto');
+const { createOrder } = require('../services/razorpayService');
+const { createPaymentIntent } = require('../services/stripeService');
 
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_KEY_SECRET,
-});
+// Razorpay Payment Controller
+const initiateRazorpayPayment = async (req, res) => {
+  try {
+    const { amount } = req.body;
 
-const initiatePayment = async (req, res) => {
+    if (!amount || amount <= 0) {
+      return res.status(400).json({ error: 'Invalid payment amount' });
+    }
+
+    const order = await createOrder(amount); // Call the createOrder function
+    res.status(200).json({ order });
+  } catch (error) {
+    console.error('Error initiating Razorpay payment:', error.message);
+    res.status(500).json({ error: 'Failed to initiate Razorpay payment' });
+  }
+};
+
+// Stripe Payment Controller
+const initiateStripePayment = async (req, res) => {
   try {
     const { amount, currency } = req.body;
-    const options = { amount: amount * 100, currency, receipt: 'receipt#1' };
-    const order = await razorpay.orders.create(options);
 
-    res.status(200).json({ orderId: order.id });
+    if (!amount || amount <= 0) {
+      return res.status(400).json({ error: 'Invalid payment amount' });
+    }
+
+    const paymentIntent = await createPaymentIntent(amount, currency || 'usd');
+    res.status(200).json({ clientSecret: paymentIntent.client_secret });
   } catch (error) {
-    console.error('Error initiating payment:', error.message);
-    res.status(500).json({ error: 'Payment initiation failed' });
+    console.error('Error initiating Stripe payment:', error.message);
+    res.status(500).json({ error: 'Failed to initiate Stripe payment' });
   }
 };
 
-const confirmPayment = (req, res) => {
-  const { orderId, paymentId, signature } = req.body;
-
-  const generatedSignature = crypto
-    .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
-    .update(`${orderId}|${paymentId}`)
-    .digest('hex');
-
-  if (generatedSignature !== signature) {
-    return res.status(400).json({ error: 'Invalid payment signature' });
-  }
-
-  res.status(200).json({ message: 'Payment verified successfully' });
-};
-
-module.exports = { initiatePayment, confirmPayment };
+module.exports = { initiateRazorpayPayment, initiateStripePayment };

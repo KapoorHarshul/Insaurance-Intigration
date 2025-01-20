@@ -1,46 +1,86 @@
 const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
 const { getConnection } = require('../services/dbService');
 
-const registerUser = async (req, res) => {
+// Create a new user
+const createUser = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, mobile, pincode } = req.body;
+
+    // Hash the password for security
     const passwordHash = await bcrypt.hash(password, 10);
 
     const connection = await getConnection();
-    await connection.execute('INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)', [name, email, passwordHash]);
+    await connection.execute(
+      'INSERT INTO users (name, email, password_hash, mobile, pincode) VALUES (?, ?, ?, ?, ?)',
+      [name, email, passwordHash, mobile, pincode]
+    );
 
-    res.status(201).json({ message: 'User registered successfully' });
+    res.status(201).json({ message: 'User created successfully' });
   } catch (error) {
-    console.error('Error registering user:', error.message);
-    res.status(500).json({ error: 'Failed to register user' });
+    console.error('Error creating user:', error.message);
+    res.status(500).json({ error: 'Failed to create user' });
   }
 };
 
-const loginUser = async (req, res) => {
+// Read user details by ID
+const getUserById = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { id } = req.params;
 
     const connection = await getConnection();
-    const [rows] = await connection.execute('SELECT * FROM users WHERE email = ?', [email]);
+    const [rows] = await connection.execute('SELECT * FROM users WHERE id = ?', [id]);
 
     if (rows.length === 0) {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    const user = rows[0];
-    const isPasswordValid = await bcrypt.compare(password, user.password_hash);
-
-    if (!isPasswordValid) {
-      return res.status(401).json({ error: 'Invalid credentials' });
-    }
-
-    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    res.status(200).json({ token });
+    res.status(200).json(rows[0]);
   } catch (error) {
-    console.error('Error logging in user:', error.message);
-    res.status(500).json({ error: 'Failed to log in' });
+    console.error('Error fetching user details:', error.message);
+    res.status(500).json({ error: 'Failed to fetch user details' });
   }
 };
 
-module.exports = { registerUser, loginUser };
+// Update user details
+const updateUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, mobile, pincode } = req.body;
+
+    const connection = await getConnection();
+    const [result] = await connection.execute(
+      'UPDATE users SET name = ?, mobile = ?, pincode = ? WHERE id = ?',
+      [name, mobile, pincode, id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.status(200).json({ message: 'User updated successfully' });
+  } catch (error) {
+    console.error('Error updating user details:', error.message);
+    res.status(500).json({ error: 'Failed to update user details' });
+  }
+};
+
+// Delete a user
+const deleteUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const connection = await getConnection();
+    const [result] = await connection.execute('DELETE FROM users WHERE id = ?', [id]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.status(200).json({ message: 'User deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting user:', error.message);
+    res.status(500).json({ error: 'Failed to delete user' });
+  }
+};
+
+module.exports = { createUser, getUserById, updateUser, deleteUser };

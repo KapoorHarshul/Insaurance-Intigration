@@ -1,10 +1,13 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const pincodeRoutes = require('./routes/pincodeRoutes');
+const paymentRoutes = require('./routes/paymentRoutes');
 
 const app = express();
 
+// Middleware
 app.use(bodyParser.json());
-app.use('/pincode', pincodeRoutes);
+
+// Payment routes
+app.use('/api/payments', paymentRoutes);
 
 module.exports = app;
