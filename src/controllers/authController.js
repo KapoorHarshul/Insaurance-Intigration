@@ -5,7 +5,7 @@ const { generateToken } = require('../utils/jwtUtils');
 // User Registration
 const registerUser = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, mobile, pincode } = req.body;
 
     // Check if the user already exists
     const connection = await getConnection();
