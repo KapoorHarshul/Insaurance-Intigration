@@ -14,11 +14,15 @@ app.use((req, res, next) => {
 const authRoutes = require('./routes/authRoutes');
 const policyRoutes = require('./routes/policyRoutes');
 const quoteRoutes = require('./routes/quoteRoutes');
+const paymentRoutes = require('./routes/paymentRoutes');  // Adjust the path as necessary
+
 
 // Setup API routes
 app.use('/api/auth', authRoutes);
-app.use('/api/policy', policyRoutes);
+app.use('/api/policies', policyRoutes);
 app.use('/api/quotes', quoteRoutes);
+app.use('/api/payments', paymentRoutes);  // Using payment routes under '/api/payments'
+
 
 // Export the configured app to be used by server.js or for testing purposes
 module.exports = app;
