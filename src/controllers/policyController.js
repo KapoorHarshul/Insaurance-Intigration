@@ -1,10 +1,9 @@
-const db = require('../services/dbService'); // Import your database service that configures mysql2
+const db = require('../services/dbService'); // Ensure the path is correct based on your project structure
 
 // Create a new policy
 exports.createPolicy = async (req, res) => {
     const { name, description, premium, coverageAmount } = req.body;
     const query = `INSERT INTO policies (name, description, premium, coverageAmount) VALUES (?, ?, ?, ?)`;
-
     try {
         const [result] = await db.pool.query(query, [name, description, premium, coverageAmount]);
         res.status(201).json({ message: "Policy created successfully", policyId: result.insertId });
@@ -17,7 +16,6 @@ exports.createPolicy = async (req, res) => {
 // Get all policies
 exports.getAllPolicies = async (req, res) => {
     const query = "SELECT * FROM policies";
-
     try {
         const [policies] = await db.pool.query(query);
         res.status(200).json(policies);
@@ -31,7 +29,6 @@ exports.getAllPolicies = async (req, res) => {
 exports.getPolicy = async (req, res) => {
     const { policyId } = req.params;
     const query = "SELECT * FROM policies WHERE id = ?";
-
     try {
         const [policy] = await db.pool.query(query, [policyId]);
         if (policy.length) {
@@ -50,7 +47,6 @@ exports.updatePolicy = async (req, res) => {
     const { policyId } = req.params;
     const { name, description, premium, coverageAmount } = req.body;
     const query = `UPDATE policies SET name = ?, description = ?, premium = ?, coverageAmount = ? WHERE id = ?`;
-
     try {
         const [result] = await db.pool.query(query, [name, description, premium, coverageAmount, policyId]);
         if (result.affectedRows) {
@@ -68,7 +64,6 @@ exports.updatePolicy = async (req, res) => {
 exports.deletePolicy = async (req, res) => {
     const { policyId } = req.params;
     const query = "DELETE FROM policies WHERE id = ?";
-
     try {
         const [result] = await db.pool.query(query, [policyId]);
         if (result.affectedRows) {

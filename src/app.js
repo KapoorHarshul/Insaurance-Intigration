@@ -17,7 +17,7 @@ const quoteRoutes = require('./routes/quoteRoutes');
 
 // Setup API routes
 app.use('/api/auth', authRoutes);
-app.use('/api/policies', policyRoutes);
+app.use('/api/policy', policyRoutes);
 app.use('/api/quotes', quoteRoutes);
 
 // Export the configured app to be used by server.js or for testing purposes
