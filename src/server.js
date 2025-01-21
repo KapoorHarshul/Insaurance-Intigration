@@ -1,18 +1,7 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const authRoutes = require('./routes/authRoutes');  // Ensure this is the correct path
-
-const app = express();
-const policyRoutes = require('./routes/policyRoutes'); // Ensure this path is correct
-
-app.use(express.json()); // Middleware to parse JSON bodies
-app.use('/api', policyRoutes); // Setup API routes
-
+const app = require('./app'); // Import the configured Express application
 const PORT = process.env.PORT || 3000;
+
+// Start the server on the specified port
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
-app.use((req, res, next) => {
-  console.log(`${req.method} ${req.path}`);
-  next();
+  console.log(`Server running on port ${PORT}`);
 });

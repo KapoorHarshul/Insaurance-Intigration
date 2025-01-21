@@ -1,17 +1,24 @@
 const express = require('express');
-const bodyParser = require('body-parser');
 const app = express();
 
-// Make sure paths are correct
-const authRoutes = require('./routes/authRoutes'); // Adjust the path as per your structure
+// Middleware to parse JSON bodies
+app.use(express.json());
 
-app.use(express.json()); // Middleware to parse JSON bodies
-app.use(bodyParser.urlencoded({ extended: true })); // Support URL-encoded bodies
-
-// Define routes with specific base paths to ensure no conflicts
-app.use('/api/auth', authRoutes); // Ensure this base path is exactly as used in your Postman requests
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+// Middleware to log every request (should be placed before route handlers to log all requests)
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.path}`);
+  next();
 });
+
+// Import route handlers
+const authRoutes = require('./routes/authRoutes');
+const policyRoutes = require('./routes/policyRoutes');
+const quoteRoutes = require('./routes/quoteRoutes');
+
+// Setup API routes
+app.use('/api/auth', authRoutes);
+app.use('/api/policies', policyRoutes);
+app.use('/api/quotes', quoteRoutes);
+
+// Export the configured app to be used by server.js or for testing purposes
+module.exports = app;
