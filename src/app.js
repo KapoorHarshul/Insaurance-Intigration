@@ -15,6 +15,8 @@ const authRoutes = require('./routes/authRoutes');
 const policyRoutes = require('./routes/policyRoutes');
 const quoteRoutes = require('./routes/quoteRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');  // Adjust the path as necessary
+const kycRoutes = require('./routes/kycRoutes');
+
 
 
 // Setup API routes
@@ -22,6 +24,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/policies', policyRoutes);
 app.use('/api/quotes', quoteRoutes);
 app.use('/api/payments', paymentRoutes);  // Using payment routes under '/api/payments'
+app.use('/api/kyc', kycRoutes);
 
 
 // Export the configured app to be used by server.js or for testing purposes
