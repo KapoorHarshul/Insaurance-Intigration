@@ -1,5 +1,3 @@
-// routes/kycRoutes.js
-
 const express = require('express');
 const router = express.Router();
 const { kycCheck } = require('../controllers/kycController');

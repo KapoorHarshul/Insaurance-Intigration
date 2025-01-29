@@ -1,13 +1,16 @@
-const apiClient = require('../services/apiService');
+const express = require('express');
+const router = express.Router();
+const { fetchPolicyPDF } = require('../services/apiService');
 
-const downloadCOI = async (req, res) => {
+// Endpoint to download PDF
+router.get('/download-coi/:policyNum', async (req, res) => {
+    const policyNum = req.params.policyNum;
     try {
-        const { proposalId } = req.params;
-        const response = await apiClient.get(`/getPolicyPDFV2/${proposalId}`);
-        res.status(200).send(response.data);
+        const pdfData = await fetchPolicyPDF(policyNum);
+        res.status(200).send(pdfData);
     } catch (error) {
-        res.status(500).json({ error: error.response.data });
+        res.status(500).json({ error: error.message });
     }
-};
+});
 
-module.exports = { downloadCOI };
+module.exports = router;

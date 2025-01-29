@@ -1,6 +1,6 @@
 // controllers/kycController.js
 
-const { performKYC } = require('../services/kycService');
+const { perforCKYC } = require('../services/kycService');
 
 const kycCheck = async (req, res) => {
   const { panNum, dob } = req.body;
