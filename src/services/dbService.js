@@ -1,34 +1,47 @@
 const mysql = require('mysql2/promise');
 require('dotenv').config();
 
-// Database configuration using environment variables
-const dbConfig = {
-    host: process.env.DB_HOST || '127.0.0.1',
-    user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || '',
-    database: process.env.DB_NAME || 'PincodeDB',
-    port: process.env.DB_PORT || 3306,
+// Create a MySQL connection pool
+const pool = mysql.createPool({
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0
-};
+});
 
-// Creating a pool of database connections
-const pool = mysql.createPool(dbConfig);
-
-// Function to get a connection from the pool
-const getConnection = async () => {
+// Function to check database connection
+const testDBConnection = async () => {
     try {
-        // This does not actually "create" a new connection, it retrieves one from the pool.
         const connection = await pool.getConnection();
-        console.log('Database connection established successfully.');
-        // Release connection back to the pool
+        console.log("✅ Database connected successfully!");
         connection.release();
-        return connection;
     } catch (error) {
-        console.error('Error connecting to the database:', error.message);
-        throw error; // Rethrowing the error to be handled by the caller
+        console.error("❌ Database connection failed:", error.message);
+        throw error;
     }
 };
 
-module.exports = { getConnection, pool };
+// Function to store KYC request in the database
+const saveKYCRequest = async (name, idNumber, dob, documentType) => {
+    try {
+        const connection = await pool.getConnection();
+        console.log("🔄 Saving KYC request to database...");
+
+        const query = `INSERT INTO kyc_requests (name, pan_card, dob, document_type) VALUES (?, ?, ?, ?)`;
+        const values = [name, idNumber, dob, documentType];
+
+        const [result] = await connection.execute(query, values);
+        connection.release();
+
+        console.log(`✅ KYC request saved successfully with ID: ${result.insertId}`);
+        return result.insertId; // Return the unique reference ID
+    } catch (error) {
+        console.error("❌ Database Error:", error.message);
+        throw error;
+    }
+};
+
+module.exports = { saveKYCRequest, testDBConnection, pool };

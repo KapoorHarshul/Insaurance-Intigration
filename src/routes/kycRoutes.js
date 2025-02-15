@@ -1,8 +1,10 @@
 const express = require('express');
-const router = express.Router();
 const { kycCheck } = require('../controllers/kycController');
+const { validateKYCRequest } = require('../middleware/kycMiddleware'); // Import middleware
 
-// Define the route for KYC check
-router.post('/check-kyc', kycCheck);
+const router = express.Router();
+
+// Add middleware to validate KYC request before processing
+router.post('/check-kyc', validateKYCRequest, kycCheck);
 
 module.exports = router;
